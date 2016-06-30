@@ -131,6 +131,7 @@ func (l *Light) Verify(block pow.Block) bool {
 	// TODO: do ethash_quick_verify before getCache in order
 	// to prevent DOS attacks.
 	blockNum := block.NumberU64()
+	//fmt.Println("block number %d too high, limit is %d", epochLength*2048)
 	if blockNum >= epochLength*2048 {
 		glog.V(logger.Debug).Infof("block number %d too high, limit is %d", epochLength*2048)
 		return false
@@ -154,6 +155,9 @@ func (l *Light) Verify(block pow.Block) bool {
 	}
 	// Recompute the hash using the cache.
 	ok, mixDigest, result := cache.compute(uint64(dagSize), block.HashNoNonce(), block.Nonce())
+	fmt.Println("ok ", ok)
+	fmt.Println("mixDigest ", mixDigest)
+	fmt.Println("result ", result)
 	if !ok {
 		return false
 	}

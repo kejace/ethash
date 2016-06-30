@@ -24,6 +24,7 @@
 #include <inttypes.h>
 #include <stddef.h>
 #include <errno.h>
+#include <stdio.h>
 #include <math.h>
 #include "mmap.h"
 #include "ethash.h"
@@ -171,6 +172,27 @@ bool ethash_compute_full_data(
 	return true;
 }
 
+void printhash(ethash_h256_t *h, int n){
+int i;
+printf("hash is ");
+for (i = 0; i < n; i++)
+{
+        if (i > 0) printf(":");
+            printf("%02X", &h[i]);
+}
+printf("\n");
+}
+
+static void print_buf(const char *title, const unsigned char *buf, size_t buf_len)
+{
+   size_t i = 0;
+   fprintf(stdout, "\n%s(%d):\n", title, 2*buf_len);
+   for(i = 0; i < buf_len; ++i)
+   fprintf(stdout, "%02x%s", buf[i],
+     ( i + 1 ) % 64 == 0 ? "\r\n" : "" );
+
+}
+
 static bool ethash_hash(
 	ethash_return_value_t* ret,
 	node const* full_nodes,
@@ -184,16 +206,31 @@ static bool ethash_hash(
 		return false;
 	}
 
+    printf("hello from ethash_hash()\n");
+    //printhash(&header_hash, 32);
 	// pack hash and nonce together into first 40 bytes of s_mix
 	assert(sizeof(node) * 8 == 512);
 	node s_mix[MIX_NODES + 1];
-	memcpy(s_mix[0].bytes, &header_hash, 32);
-	fix_endian64(s_mix[0].double_words[4], nonce);
-
+    node s_mixtemp[MIX_NODES + 1];
+    node s_mixcopy[MIX_NODES + 1];	
+    
+    memcpy(s_mix[0].bytes, &header_hash, 32);
+	print_buf("(pre-nonce) s_mix", s_mix[0].bytes, 64);
+    memcpy(s_mixtemp[0].bytes , &header_hash, 32);
+    SHA3_512(s_mixtemp->bytes, s_mixtemp->bytes, 40);
+    fix_endian64(s_mix[0].double_words[4], nonce);
+    memcpy(s_mixcopy[0].bytes, s_mix[0].bytes, 32); 
 	// compute sha3-512 hash and replicate across mix
 	SHA3_512(s_mix->bytes, s_mix->bytes, 40);
 	fix_endian_arr32(s_mix[0].words, 16);
 
+    //printhash(s_mix[0].bytes, 64);
+    printf("\nnonce is %lu\n", nonce);
+    print_buf("header_hash", &header_hash, 32);
+    print_buf("SHA(header_hash)", s_mixtemp[0].bytes, 64);
+    print_buf("(pre-sha) s_mix", s_mixcopy->bytes, 40);
+    print_buf("(post-sha) s_mix", s_mix->bytes, 40);
+    print_buf("SHA512", s_mix[0].bytes, 64);
 	node* const mix = s_mix + 1;
 	for (uint32_t w = 0; w != MIX_WORDS; ++w) {
 		mix->words[w] = s_mix[0].words[w % NODE_WORDS];
