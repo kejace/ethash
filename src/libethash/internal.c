@@ -215,23 +215,26 @@ static bool ethash_hash(
     node s_mixcopy[MIX_NODES + 1];	
     
     memcpy(s_mix[0].bytes, &header_hash, 32);
-	print_buf("(pre-nonce) s_mix", s_mix[0].bytes, 64);
+    
     memcpy(s_mixtemp[0].bytes , &header_hash, 32);
-    SHA3_512(s_mixtemp->bytes, s_mixtemp->bytes, 40);
+    SHA3_512(s_mixtemp->bytes, s_mixtemp->bytes, 32);
+    
     fix_endian64(s_mix[0].double_words[4], nonce);
-    memcpy(s_mixcopy[0].bytes, s_mix[0].bytes, 32); 
-	// compute sha3-512 hash and replicate across mix
+    memcpy(s_mixcopy[0].bytes, s_mix[0].bytes, 40); 
+	
+    // compute sha3-512 hash and replicate across mix
 	SHA3_512(s_mix->bytes, s_mix->bytes, 40);
-	fix_endian_arr32(s_mix[0].words, 16);
+	
+    fix_endian_arr32(s_mix[0].words, 16);
 
-    //printhash(s_mix[0].bytes, 64);
     printf("\nnonce is %lu\n", nonce);
     print_buf("header_hash", &header_hash, 32);
     print_buf("SHA(header_hash)", s_mixtemp[0].bytes, 64);
     print_buf("(pre-sha) s_mix", s_mixcopy->bytes, 40);
-    print_buf("(post-sha) s_mix", s_mix->bytes, 40);
-    print_buf("SHA512", s_mix[0].bytes, 64);
-	node* const mix = s_mix + 1;
+    print_buf("(post-sha) s_mix", s_mix[0].bytes, 64);
+    printf("\nsize is %lu\n", full_size);
+
+    node* const mix = s_mix + 1;
 	for (uint32_t w = 0; w != MIX_WORDS; ++w) {
 		mix->words[w] = s_mix[0].words[w % NODE_WORDS];
 	}

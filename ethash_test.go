@@ -52,36 +52,36 @@ func (b *testBlock) MixDigest() common.Hash   { return b.mixDigest }
 func (b *testBlock) NumberU64() uint64        { return b.number }
 
 var validBlocks = []*testBlock{
-	//frontierBlock1 = TestBlock
-	//                   (BS8.pack "85913a3057ea8bec78cd916871ca73802e77724e014dda65add3405d02240eb7")
-	//                   (BS8.pack "969b900de27b6ac6a67742365dd65f55a0526c41fd18e1b16f1a1215c2e66f59")
-	//                   (integer2ByteString 6024642674226569000)
-	//                   17171480576 --539bd4979fef1ec4
-	//																					                    1
+	// frontierBlock1 = TestBlock
+	//            (BS8.pack "85913a3057ea8bec78cd916871ca73802e77724e014dda65add3405d02240eb7")
+	//            (BS8.pack "969b900de27b6ac6a67742365dd65f55a0526c41fd18e1b16f1a1215c2e66f59")
+	//            (integer2ByteString 6024642674226569000)
+	//            17171480576 --539bd4979fef1ec4
+	//            1
 	// fake block 666
 	//{
 	//	number:      666,
-	//	hashNoNonce: common.HexToHash("0000000000000000000000000000000000000000000000000000000000000001"),
+	//	hashNoNonce: common.HexToHash("000000000000000000000000000000000000000000000000000000000000000a"),
 	//	difficulty:  big.NewInt(1),
-	//	nonce:       0x0000000000000001,
+	//	nonce:       0x0000000000030201,
 	//	mixDigest:   common.HexToHash("0000000000000000000000000000000000000000000000000000000000000001"),
 	//},
 	// frontier block 0
-	//{
-	//	number:      0,
-	//	hashNoNonce: common.HexToHash("85913a3057ea8bec78cd916871ca73802e77724e014dda65add3405d02240eb7"),
-	//	difficulty:  big.NewInt(17171480576),
-	//	nonce:       0x539bd4979fef1ec4,
-	//	mixDigest:   common.HexToHash("969b900de27b6ac6a67742365dd65f55a0526c41fd18e1b16f1a1215c2e66f59"),
-	//},
-	// from parity ethash test
 	{
-		number:      1,
-		hashNoNonce: common.HexToHash("f57e6f3acfc0dd4b5bf2bee40ab3358aa68773a8d09f5e595eab559405527d72"),
-		difficulty:  big.NewInt(9166922271705),
-		nonce:       0xd7b3ac70a301a249,
-		mixDigest:   common.HexToHash("1fff04cec94173fd591e3d8960ce6bdf8b1971048c71ff937bb2d32a6431ab6d"),
+		number:      0,
+	    hashNoNonce: common.HexToHash("85913a3057ea8bec78cd916871ca73802e77724e014dda65add3405d02240eb7"),
+		difficulty:  big.NewInt(17171480576),
+		nonce:       0x539bd4979fef1ec4,
+		mixDigest:   common.HexToHash("969b900de27b6ac6a67742365dd65f55a0526c41fd18e1b16f1a1215c2e66f59"),
 	},
+	// from parity ethash test
+	//{
+	//	number:      1,
+	//	hashNoNonce: common.HexToHash("f57e6f3acfc0dd4b5bf2bee40ab3358aa68773a8d09f5e595eab559405527d72"),
+	//	difficulty:  big.NewInt(9166922271705),
+	//	nonce:       0xd7b3ac70a301a249,
+	//	mixDigest:   common.HexToHash("1fff04cec94173fd591e3d8960ce6bdf8b1971048c71ff937bb2d32a6431ab6d"),
+	//},
 	// from proof of concept nine testnet, epoch 0
 	{
 		number:      22,
@@ -91,13 +91,13 @@ var validBlocks = []*testBlock{
 		mixDigest:   common.HexToHash("2f74cdeb198af0b9abe65d22d372e22fb2d474371774a9583c1cc427a07939f5"),
 	},
 	// from proof of concept nine testnet, epoch 1
-	//{
-	//	number:      30001,
-	//	hashNoNonce: common.HexToHash("7e44356ee3441623bc72a683fd3708fdf75e971bbe294f33e539eedad4b92b34"),
-	//	difficulty:  big.NewInt(1532671),
-	//	nonce:       0x318df1c8adef7e5e,
-	//	mixDigest:   common.HexToHash("144b180aad09ae3c81fb07be92c8e6351b5646dda80e6844ae1b697e55ddde84"),
-	//},
+	{
+		number:      30001,
+		hashNoNonce: common.HexToHash("7e44356ee3441623bc72a683fd3708fdf75e971bbe294f33e539eedad4b92b34"),
+		difficulty:  big.NewInt(1532671),
+		nonce:       0x318df1c8adef7e5e,
+		mixDigest:   common.HexToHash("144b180aad09ae3c81fb07be92c8e6351b5646dda80e6844ae1b697e55ddde84"),
+	},
 	// from proof of concept nine testnet, epoch 2
 	//{
 	//	number:      60000,
@@ -228,7 +228,7 @@ func rTestEthashSearchAcrossEpoch(t *testing.T) {
 	}
 }
 
-func rTestGetSeedHash(t *testing.T) {
+func TestGetSeedHash(t *testing.T) {
 	seed0, err := GetSeedHash(0)
 	if err != nil {
 		t.Errorf("Failed to get seedHash for block 0: %v", err)
@@ -248,6 +248,7 @@ func rTestGetSeedHash(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
+	fmt.Println("\n-----------------------------\nSeed: %s\n", hex.EncodeToString(seed1))
 
 	if bytes.Compare(seed1, expectedSeed1) != 0 {
 		log.Printf("seedHash for block 1 should be: %v,\nactual value: %v\n", expectedSeed1, seed1)

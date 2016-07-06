@@ -28,6 +28,7 @@ import "C"
 import (
 	"errors"
 	"fmt"
+	"encoding/hex"
 	"io/ioutil"
 	"math/big"
 	"math/rand"
@@ -156,8 +157,8 @@ func (l *Light) Verify(block pow.Block) bool {
 	// Recompute the hash using the cache.
 	ok, mixDigest, result := cache.compute(uint64(dagSize), block.HashNoNonce(), block.Nonce())
 	fmt.Println("ok ", ok)
-	fmt.Println("mixDigest ", mixDigest)
-	fmt.Println("result ", result)
+	fmt.Println("mixDigest ", hex.EncodeToString(mixDigest[:]))
+	fmt.Println("result ", hex.EncodeToString(result[:]))
 	if !ok {
 		return false
 	}
@@ -438,8 +439,11 @@ func GetSeedHash(blockNum uint64) ([]byte, error) {
 }
 
 func makeSeedHash(epoch uint64) (sh common.Hash) {
+	fmt.Println("\nmakeSeedHash(%d)", epoch)
 	for ; epoch > 0; epoch-- {
+		fmt.Println("\nSeed ( %v\t): %s\n", epoch, hex.EncodeToString(sh[:]))
 		sh = crypto.Sha3Hash(sh[:])
 	}
+	fmt.Println("\nReturn seed: %s\n", epoch, hex.EncodeToString(sh[:]))
 	return sh
 }
